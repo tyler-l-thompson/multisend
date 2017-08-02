@@ -1,0 +1,82 @@
+'''
+Created on Aug 2, 2017
+
+@author: Tyler Thompson
+'''
+
+import json,re
+from Objects import Computer,SshSendStatus
+from Classes import Tools
+
+class Computers(object):
+    '''
+    classdocs
+    '''
+
+
+    def __init__(self, configFilePath):
+        '''
+        Constructor
+        '''
+        self.tools = Tools.Tools()
+        self.configFilePath = configFilePath
+        self.computers = self.getComputers(printConfig=False)
+
+    def getComputers(self, printConfig=True):
+        computers = []
+        with open(self.configFilePath) as configFile:
+            labInfo = json.load(configFile)
+        for id, info in labInfo.iteritems():
+            newComputer = Computer.Computer(id=id, hostname=info['hostname'], mac=info['mac'], ip=info['ip'],
+                                            assettag=info['assettag'])
+            computers.append(newComputer)
+        computers.sort(key=lambda x: x.id)
+        if printConfig:
+            self.tools.prettyPrintObjects(objects=computers, title="C-220 Computers")
+        return computers
+
+    def setRange(self, idRange):
+        if idRange == False:
+            return
+        idRangeList = idRange.split('-')
+        start = int(idRangeList[0])
+        stop = int(idRangeList[1]) + 1
+        comLength = len(self.computers)
+        if stop == comLength:
+            return
+        if stop > comLength:
+            stop = comLength
+        setComputers = []
+        for i in range(start, stop):
+            computer = self.computers[i]
+            cid = int(re.sub('[^0-9]','', computer.id))
+            if cid == i:
+                setComputers.append(computer)
+        self.computers = setComputers
+
+    def setList(self, idList):
+        if idList == False:
+            return
+        ids = idList.split(',')
+        setComputers = []
+        for computer in self.computers:
+            for i in range(len(ids)):
+                cid = int(re.sub('[^0-9]','', computer.id))
+                if cid == int(ids[i]):
+                    setComputers.append(computer)
+        self.computers = setComputers
+
+    def sendSshToAll(self, cmd, user="root", printStatus=True):
+        print "Sending ssh command '" + cmd + "' to all computers..."
+        sshSendStatuses = []
+        for computer in self.computers:
+            ping = self.tools.getPing(ip=computer.ip)
+            newStatus = SshSendStatus.SshSendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
+            if ping == True:
+                newStatus.sshReturn = self.tools.sendSsh(user=user, ip=computer.ip, cmd=cmd)
+            elif ping == False:
+                print "Ping failed for " + computer.id + ", " + computer.ip + " Skipping..."
+            sshSendStatuses.append(newStatus)
+        if printStatus:
+            self.tools.prettyPrintObjects(objects=sshSendStatuses, title="SSH Send Report")
+        return sshSendStatuses
