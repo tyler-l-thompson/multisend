@@ -4,7 +4,7 @@ Created on Aug 2, 2017
 @author: Tyler Thompson
 '''
 
-import json,re
+import json,re,sys
 from Objects import Computer,SshSendStatus
 from Classes import Tools
 
@@ -20,7 +20,11 @@ class Computers(object):
         '''
         self.tools = Tools.Tools()
         self.configFilePath = configFilePath
-        self.computers = self.getComputers(printConfig=False)
+        try:
+            self.computers = self.getComputers(printConfig=False)
+        except:
+            print "Failed to read file: " + str(self.configFilePath)
+            sys.exit(0)
 
     def getComputers(self, printConfig=True):
         computers = []
