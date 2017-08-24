@@ -10,7 +10,7 @@ class SshSendStatus(object):
     '''
 
 
-    def __init__(self, id, ip, user, ping, sshReturn=None):
+    def __init__(self, id, ip, user, ping, functionReturn=None):
         '''
         Constructor
         '''
@@ -18,4 +18,4 @@ class SshSendStatus(object):
         self.ip = ip
         self.user = user
         self.ping = ping
-        self.sshReturn = sshReturn
+        self.functionReturn = functionReturn

@@ -41,14 +41,26 @@ def main():
         cd.sendFileToAll(src=args.src, dest=args.dest, user=args.u, idfile=args.i)
         sys.exit(0)
 
-    if args.c != None:
+    elif args.c != None:
         confirmSend(cmd=args.c)
-        cd.sendSshToAll(cmd=args.c, user=args.u)
+        cd.sendSshToAll(cmd=args.c, user=args.u, idFile=args.i)
         sys.exit(0)
 
+    elif args.dffreeze == True:
+        cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/DeepFreeze/deepfreeze' -u " + args.dfuser + " -p bootFrozen"
+        confirmSend(cmd=cmd)
+        cd.sendSshToAll(cmd=cmd, user=args.u, idFile=args.i)
+        sys.exit(0)
 
-    print "You must pass a command. Use --help to see usage."
-    sys.exit(0)
+    elif args.dfthaw == True:
+        cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/DeepFreeze/deepfreeze' -u " + args.dfuser + " -p bootThawed"
+        confirmSend(cmd=cmd)
+        cd.sendSshToAll(cmd=cmd, user=args.u, idFile=args.i)
+        sys.exit(0)
+
+    else:
+        print "You must pass a command. Use --help to see usage."
+        sys.exit(0)
 
 
 def confirmSend(cmd):
@@ -78,8 +90,10 @@ def getArgs():
     parser.add_option('-m', action="store", default=False, help="Set comma delimited list of computers to send command to. ie. 03,05,10,23")
     parser.add_option('-p', action="store_true", default=False, help="Print the config and exit.")
     parser.add_option('-f', action="store", default=False, help="Specify a different config file to read. Default: " + configFilePath)
-    parser.add_option('--df', action="store", default=False, help="DeepFreeze: Freeze specified computers.")
-    parser.add_option('--dt', action="store", default=False, help="DeepFreeze: Thaw specified computers")
+    parser.add_option('--dffreeze', action="store_true", default=False, help="DeepFreeze: Freeze specified computers.")
+    parser.add_option('--dfthaw', action="store_true", default=False, help="DeepFreeze: Thaw specified computers")
+    parser.add_option('--dfuser', action="store", default="admin", help="DeepFreeze: The DeepFreeze user. Default: admin")
+    parser.add_option('--dfpass', action="store", default="youshallnotpass", help="DeepFreeze: The DeepFreeze password. Default: youshallnotpass")
     parser.add_option('--rsync', action="store_true", default=False, help="Send a file unsing rsync to the remote host(s)")
     parser.add_option('--src', action="store", default=False, help="Source file to send. Must be used with --rsync")
     parser.add_option('--dest', action="store", default=False, help="Destination for file being sent. Must be used with --rsync")

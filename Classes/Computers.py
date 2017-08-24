@@ -5,7 +5,7 @@ Created on Aug 2, 2017
 '''
 
 import json,re,sys
-from Objects import Computer,SshSendStatus
+from Objects import Computer,SendStatus
 from Classes import Tools
 
 class Computers(object):
@@ -70,16 +70,16 @@ class Computers(object):
                     setComputers.append(computer)
         self.computers = setComputers
 
-    def sendSshToAll(self, cmd, user="root", printStatus=True):
+    def sendSshToAll(self, cmd, user, idFile):
         print "Sending ssh command '" + cmd + "' to targeted computers..."
         sshSendStatuses = []
         for computer in self.computers:
             print computer.hostname + "... ",
             ping = self.tools.getPing(ip=computer.ip)
-            newStatus = SshSendStatus.SshSendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
+            newStatus = SendStatus.SshSendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
             if ping == True:
-                newStatus.sshReturn = self.tools.sendSsh(user=user, ip=computer.ip, cmd=cmd)
-                if "timed out" in newStatus.sshReturn:
+                newStatus.functionReturn = self.tools.sendSsh(user=user, ip=computer.ip, cmd=cmd, idFile=idFile)
+                if "timed out" in newStatus.functionReturn:
                     print "Connection timed out."
                 else:
                     print "Sent."
@@ -87,8 +87,8 @@ class Computers(object):
                 print "Ping failed for " + computer.id + ", " + computer.ip + " Skipping..."
             sshSendStatuses.append(newStatus)
 
-        if printStatus:
-            self.tools.prettyPrintObjects(objects=sshSendStatuses, title="SSH Send Report")
+
+        self.tools.prettyPrintObjects(objects=sshSendStatuses, title="SSH Send Report")
         return sshSendStatuses
 
     def sendFileToAll(self, src, dest, user, idfile):
@@ -97,11 +97,11 @@ class Computers(object):
         for computer in self.computers:
             print computer.hostname + "... ",
             ping = self.tools.getPing(ip=computer.ip)
-            newStatus = SshSendStatus.SshSendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
+            newStatus = SendStatus.SshSendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
             if ping == True:
-                newStatus.sshReturn = self.tools.sendFile(user=user, ip=computer.ip, src=src, dest=dest, idFile=idfile)
-                if newStatus.sshReturn != "File transfer complete":
-                    print newStatus.sshReturn
+                newStatus.functionReturn = self.tools.sendFile(user=user, ip=computer.ip, src=src, dest=dest, idFile=idfile)
+                if newStatus.functionReturn != "File transfer complete":
+                    print newStatus.functionReturn
                 else:
                     print "Sent."
             elif ping == False:
