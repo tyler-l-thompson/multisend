@@ -47,15 +47,21 @@ def main():
         sys.exit(0)
 
     elif args.dffreeze == True:
-        cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/DeepFreeze/deepfreeze' -u " + args.dfuser + " -p bootFrozen"
+        cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p bootFrozen"
         confirmSend(cmd=cmd)
         cd.sendSshToAll(cmd=cmd, user=args.u, idFile=args.i)
         sys.exit(0)
 
     elif args.dfthaw == True:
-        cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/DeepFreeze/deepfreeze' -u " + args.dfuser + " -p bootThawed"
+        cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p bootThawed"
         confirmSend(cmd=cmd)
         cd.sendSshToAll(cmd=cmd, user=args.u, idFile=args.i)
+        sys.exit(0)
+
+    elif args.dfstatus == True:
+        cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p status"
+        confirmSend(cmd=cmd)
+        cd.sendSshToAll(cmd=cmd, user=args.u, idFile=args.i, dfstatus=True)
         sys.exit(0)
 
     else:
@@ -92,6 +98,7 @@ def getArgs():
     parser.add_option('-f', action="store", default=False, help="Specify a different config file to read. Default: " + configFilePath)
     parser.add_option('--dffreeze', action="store_true", default=False, help="DeepFreeze: Freeze specified computers.")
     parser.add_option('--dfthaw', action="store_true", default=False, help="DeepFreeze: Thaw specified computers")
+    parser.add_option('--dfstatus', action="store_true", default=False, help="DeepFreeze: Get DeepFreeze status")
     parser.add_option('--dfuser', action="store", default="admin", help="DeepFreeze: The DeepFreeze user. Default: admin")
     parser.add_option('--dfpass', action="store", default="youshallnotpass", help="DeepFreeze: The DeepFreeze password. Default: youshallnotpass")
     parser.add_option('--rsync', action="store_true", default=False, help="Send a file unsing rsync to the remote host(s)")

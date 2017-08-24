@@ -70,7 +70,7 @@ class Computers(object):
                     setComputers.append(computer)
         self.computers = setComputers
 
-    def sendSshToAll(self, cmd, user, idFile):
+    def sendSshToAll(self, cmd, user, idFile, dfstatus=False):
         print "Sending ssh command '" + cmd + "' to targeted computers..."
         sshSendStatuses = []
         for computer in self.computers:
@@ -78,7 +78,20 @@ class Computers(object):
             ping = self.tools.getPing(ip=computer.ip)
             newStatus = SendStatus.SendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
             if ping == True:
-                newStatus.functionReturn = self.tools.sendSsh(user=user, ip=computer.ip, cmd=cmd, idFile=idFile)
+                status = self.tools.sendSsh(user=user, ip=computer.ip, cmd=cmd, idFile=idFile)
+
+                #detect if reading a deep freeze status report
+                if dfstatus == True:
+
+                    if "BOOT FROZEN" in status:
+                        newStatus.functionReturn = "FROZEN"
+                    elif "BOOT THAWED" in status:
+                        newStatus.functionReturn = "THAWED"
+                    else:
+                        newStatus.functionReturn = "UNKNOWN"
+                else:
+                    newStatus.functionReturn = status
+
                 if "timed out" in newStatus.functionReturn:
                     print "Connection timed out."
                 else:
