@@ -213,4 +213,19 @@ class Tools(object):
         if "Permission denied" in status:
             print "Failed to connect to " + ip + " " + status
             return "Permission Denied"
-        return str(status)
+        return str(status).strip()
+
+    def sendFile(self, user, ip, src, dest, idFile="~/.ssh/id_rsa", connectTimeout="5", strictHostKeyChecking="no", batchMode="yes"):
+        status = commands.getoutput("rsync -hav -e 'ssh -i " + idFile + " -o connectTimeout=" + connectTimeout +
+                                    " -o strictHostKeyChecking=" + strictHostKeyChecking + " -o batchMode=" + batchMode + "' " +
+                                    src + " " + user + "@" + ip + ":" + dest)
+        if "Permission denied" in status:
+            #print "Failed to connect to " + ip + " " + status
+            return "Permission Denied"
+        elif "timed out" in status:
+            #print "Connection timed out to " + ip
+            return "Connection timed out"
+        elif "sent" in status and "received" in status and "speedup" in status:
+            return "File transfer complete"
+        else:
+            return status

@@ -71,16 +71,42 @@ class Computers(object):
         self.computers = setComputers
 
     def sendSshToAll(self, cmd, user="root", printStatus=True):
-        print "Sending ssh command '" + cmd + "' to all computers..."
+        print "Sending ssh command '" + cmd + "' to targeted computers..."
         sshSendStatuses = []
         for computer in self.computers:
+            print computer.hostname + "... ",
             ping = self.tools.getPing(ip=computer.ip)
             newStatus = SshSendStatus.SshSendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
             if ping == True:
                 newStatus.sshReturn = self.tools.sendSsh(user=user, ip=computer.ip, cmd=cmd)
+                if "timed out" in newStatus.sshReturn:
+                    print "Connection timed out."
+                else:
+                    print "Sent."
             elif ping == False:
                 print "Ping failed for " + computer.id + ", " + computer.ip + " Skipping..."
             sshSendStatuses.append(newStatus)
+
         if printStatus:
             self.tools.prettyPrintObjects(objects=sshSendStatuses, title="SSH Send Report")
         return sshSendStatuses
+
+    def sendFileToAll(self, src, dest, user, idfile):
+        print "Sending file: " + src + " to: " + dest + " on targeted computers..."
+        fileSendStatuses = []
+        for computer in self.computers:
+            print computer.hostname + "... ",
+            ping = self.tools.getPing(ip=computer.ip)
+            newStatus = SshSendStatus.SshSendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
+            if ping == True:
+                newStatus.sshReturn = self.tools.sendFile(user=user, ip=computer.ip, src=src, dest=dest, idFile=idfile)
+                if newStatus.sshReturn != "File transfer complete":
+                    print newStatus.sshReturn
+                else:
+                    print "Sent."
+            elif ping == False:
+                print "Ping failed for " + computer.id + ", " + computer.ip + " Skipping..."
+                fileSendStatuses.append(newStatus)
+
+        self.tools.prettyPrintObjects(objects=fileSendStatuses, title="RSYNC File Send Report")
+        return fileSendStatuses
