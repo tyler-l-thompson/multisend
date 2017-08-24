@@ -76,7 +76,7 @@ class Computers(object):
         for computer in self.computers:
             print computer.hostname + "... ",
             ping = self.tools.getPing(ip=computer.ip)
-            newStatus = SendStatus.SshSendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
+            newStatus = SendStatus.SendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
             if ping == True:
                 newStatus.functionReturn = self.tools.sendSsh(user=user, ip=computer.ip, cmd=cmd, idFile=idFile)
                 if "timed out" in newStatus.functionReturn:
@@ -97,7 +97,7 @@ class Computers(object):
         for computer in self.computers:
             print computer.hostname + "... ",
             ping = self.tools.getPing(ip=computer.ip)
-            newStatus = SendStatus.SshSendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
+            newStatus = SendStatus.SendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
             if ping == True:
                 newStatus.functionReturn = self.tools.sendFile(user=user, ip=computer.ip, src=src, dest=dest, idFile=idfile)
                 if newStatus.functionReturn != "File transfer complete":
@@ -106,7 +106,7 @@ class Computers(object):
                     print "Sent."
             elif ping == False:
                 print "Ping failed for " + computer.id + ", " + computer.ip + " Skipping..."
-                fileSendStatuses.append(newStatus)
+            fileSendStatuses.append(newStatus)
 
         self.tools.prettyPrintObjects(objects=fileSendStatuses, title="RSYNC File Send Report")
         return fileSendStatuses

@@ -4,7 +4,7 @@ Created on Aug 2, 2017
 @author: Tyler Thompson
 '''
 
-class SshSendStatus(object):
+class SendStatus(object):
     '''
     classdocs
     '''
