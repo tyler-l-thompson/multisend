@@ -78,19 +78,16 @@ class Computers(object):
             ping = self.tools.getPing(ip=computer.ip)
             newStatus = SendStatus.SendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
             if ping == True:
-                status = self.tools.sendSsh(user=user, ip=computer.ip, cmd=cmd, idFile=idFile)
+                newStatus.functionReturn = self.tools.sendSsh(user=user, ip=computer.ip, cmd=cmd, idFile=idFile)
 
                 #detect if reading a deep freeze status report
                 if dfstatus == True:
-
-                    if "BOOT FROZEN" in status:
+                    if "BOOT FROZEN" in newStatus.functionReturn:
                         newStatus.functionReturn = "FROZEN"
-                    elif "BOOT THAWED" in status:
+                    elif "BOOT THAWED" in newStatus.functionReturn:
                         newStatus.functionReturn = "THAWED"
                     else:
                         newStatus.functionReturn = "UNKNOWN"
-                else:
-                    newStatus.functionReturn = status
 
                 if "timed out" in newStatus.functionReturn:
                     print "Connection timed out."
