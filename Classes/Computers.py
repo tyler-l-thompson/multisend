@@ -46,8 +46,6 @@ class Computers(object):
         start = int(idRangeList[0])
         stop = int(idRangeList[1]) + 1
         comLength = len(self.computers)
-        if stop == comLength:
-            return
         if stop > comLength:
             stop = comLength
         setComputers = []
