@@ -37,30 +37,35 @@ def main():
         if args.src == False or args.dest == False:
             print "--rsync must be used with --src and --dest. Use --help to see usage."
             sys.exit(0)
-        confirmSend(cmd="rsync")
+        if not args.y:
+            confirmSend(cmd="rsync")
         cd.sendFileToAll(src=args.src, dest=args.dest, user=args.u, idfile=args.i)
         sys.exit(0)
 
     elif args.c != None:
-        confirmSend(cmd=args.c)
+        if not args.y:
+            confirmSend(cmd=args.c)
         cd.sendSshToAll(cmd=args.c, user=args.u, idFile=args.i)
         sys.exit(0)
 
     elif args.dffreeze == True:
         cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p bootFrozen"
-        confirmSend(cmd=cmd)
+        if not args.y:
+            confirmSend(cmd=cmd)
         cd.sendSshToAll(cmd=cmd, user=args.u, idFile=args.i)
         sys.exit(0)
 
     elif args.dfthaw == True:
         cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p bootThawed"
-        confirmSend(cmd=cmd)
+        if not args.y:
+            confirmSend(cmd=cmd)
         cd.sendSshToAll(cmd=cmd, user=args.u, idFile=args.i)
         sys.exit(0)
 
     elif args.dfstatus == True:
         cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p status"
-        confirmSend(cmd=cmd)
+        if not args.y:
+            confirmSend(cmd=cmd)
         cd.sendSshToAll(cmd=cmd, user=args.u, idFile=args.i, dfstatus=True)
         sys.exit(0)
 
@@ -89,6 +94,7 @@ def confirmSend(cmd):
 
 def getArgs():
     parser = optparse.OptionParser(usage='%prog -c <COMMAND> [options]',description="C-220 SSH Send. Send a terminal command to all the computers in C-220. Optionally you can send a command to a single computer or a range of computers.")
+    parser.add_option('-y', action="store_true", help="Suppress confirmation prompt.")
     parser.add_option('-c', action="store", help="Command to send")
     parser.add_option('-u', action="store", default="root", help="User to send command as. Default: root")
     parser.add_option('-i', action="store", default="~/.ssh/id_rsa", help="Identity file to use. Default: ~/.ssh/id_rsa")
