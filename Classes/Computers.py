@@ -6,7 +6,7 @@ Created on Aug 2, 2017
 
 import json,re,sys,time
 from Objects import Computer,SendStatus
-from Classes import Tools, SshSendThreaded
+from Classes import Tools, SshSendThreaded, RsyncThreaded
 
 class Computers(object):
     '''
@@ -68,42 +68,42 @@ class Computers(object):
                     setComputers.append(computer)
         self.computers = setComputers
 
-    def sendSshToAll(self, cmd, user, idFile, dfstatus=False):
-        print "Sending ssh command '" + cmd + "' to targeted computers..."
-        sshSendStatuses = []
-        for computer in self.computers:
-            print computer.hostname + "... ",
-            ping = self.tools.getPing(ip=computer.ip)
-            newStatus = SendStatus.SendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
-            if ping == True:
-                newStatus.functionReturn = self.tools.sendSsh(user=user, ip=computer.ip, cmd=cmd, idFile=idFile)
-
-                #detect if reading a deep freeze status report
-                if dfstatus == True:
-                    if "BOOT FROZEN" in newStatus.functionReturn:
-                        newStatus.functionReturn = "FROZEN"
-                    elif "BOOT THAWED" in newStatus.functionReturn:
-                        newStatus.functionReturn = "THAWED"
-                    else:
-                        newStatus.functionReturn = "UNKNOWN"
-
-                if "timed out" in newStatus.functionReturn:
-                    print "Connection timed out."
-                else:
-                    print "Sent."
-            elif ping == False:
-                print "Ping failed for " + computer.id + ", " + computer.ip + " Skipping..."
-            sshSendStatuses.append(newStatus)
-
-
-        self.tools.prettyPrintObjects(objects=sshSendStatuses, title="SSH Send Report")
-        return sshSendStatuses
+    # def sendSshToAll(self, cmd, user, idFile, dfstatus=False):
+    #     print "Sending ssh command '" + cmd + "' to targeted computers..."
+    #     sshSendStatuses = []
+    #     for computer in self.computers:
+    #         print computer.hostname + "... ",
+    #         ping = self.tools.getPing(ip=computer.ip)
+    #         newStatus = SendStatus.SendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
+    #         if ping == True:
+    #             newStatus.functionReturn = self.tools.sendSsh(user=user, ip=computer.ip, cmd=cmd, idFile=idFile)
+    #
+    #             #detect if reading a deep freeze status report
+    #             if dfstatus == True:
+    #                 if "BOOT FROZEN" in newStatus.functionReturn:
+    #                     newStatus.functionReturn = "FROZEN"
+    #                 elif "BOOT THAWED" in newStatus.functionReturn:
+    #                     newStatus.functionReturn = "THAWED"
+    #                 else:
+    #                     newStatus.functionReturn = "UNKNOWN"
+    #
+    #             if "timed out" in newStatus.functionReturn:
+    #                 print "Connection timed out."
+    #             else:
+    #                 print "Sent."
+    #         elif ping == False:
+    #             print "Ping failed for " + computer.id + ", " + computer.ip + " Skipping..."
+    #         sshSendStatuses.append(newStatus)
+    #
+    #
+    #     self.tools.prettyPrintObjects(objects=sshSendStatuses, title="SSH Send Report")
+    #     return sshSendStatuses
 
     def sendSshToAllThreaded(self, cmd, user, idFile, dfstatus=False):
         print "Sending ssh command '" + cmd + "' to targeted computers..."
 
         #create thread object for each computer
-        sshThreads = []
+        threads = []
         for computer in self.computers:
             #print computer.hostname + "... ",
             computer.idFile = idFile
@@ -111,46 +111,76 @@ class Computers(object):
             computer.dfstatus = dfstatus
             computer.cmd = cmd
             computer.dfstatus = dfstatus
-            sshThreads.append(SshSendThreaded.SshSendThreaded(computer=computer))
+            threads.append(SshSendThreaded.SshSendThreaded(computer=computer))
 
         #start all the threads
-        for sshThread in sshThreads:
-            status = sshThread.start()
+        for thread in threads:
+            thread.start()
 
         #wait for all threads to terminate
         while True:
             time.sleep(0.5)
             exit = True
-            for sshThread in sshThreads:
-                if sshThread.isAlive() == True:
+            for thread in threads:
+                if thread.isAlive() == True:
                     exit = False
             if exit == True:
                 break
 
         #joing all the threads together
-        returnStatuses = []
-        for sshThread in sshThreads:
-            returnStatuses.append(sshThread.join())
+        for thread in threads:
+            thread.join()
+        #print the report
+        self.tools.prettyPrintObjects(objects=self.computers, title="SSH Send Report", objFilter="src,cmd,dest,idFile,dfstatus,user")
 
-        self.tools.prettyPrintObjects(objects=returnStatuses, title="SSH Send Report", objFilter="src,cmd,dest,idFile,dfstatus,user")
-        return returnStatuses
+    # def sendFileToAll(self, src, dest, user, idfile):
+    #     print "Sending file: " + src + " to: " + dest + " on targeted computers..."
+    #     fileSendStatuses = []
+    #     for computer in self.computers:
+    #         print computer.hostname + "... ",
+    #         ping = self.tools.getPing(ip=computer.ip)
+    #         newStatus = SendStatus.SendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
+    #         if ping == True:
+    #             newStatus.functionReturn = self.tools.sendFile(user=user, ip=computer.ip, src=src, dest=dest, idFile=idfile)
+    #             if newStatus.functionReturn != "File transfer complete":
+    #                 print newStatus.functionReturn
+    #             else:
+    #                 print "Sent."
+    #         elif ping == False:
+    #             print "Ping failed for " + computer.id + ", " + computer.ip + " Skipping..."
+    #         fileSendStatuses.append(newStatus)
+    #
+    #     self.tools.prettyPrintObjects(objects=fileSendStatuses, title="RSYNC File Send Report")
+    #     return fileSendStatuses
 
-    def sendFileToAll(self, src, dest, user, idfile):
+    def sendFileToAllThreaded(self, src, dest, user, idfile):
         print "Sending file: " + src + " to: " + dest + " on targeted computers..."
-        fileSendStatuses = []
-        for computer in self.computers:
-            print computer.hostname + "... ",
-            ping = self.tools.getPing(ip=computer.ip)
-            newStatus = SendStatus.SendStatus(id=computer.id, ip=computer.ip, user=user, ping=ping)
-            if ping == True:
-                newStatus.functionReturn = self.tools.sendFile(user=user, ip=computer.ip, src=src, dest=dest, idFile=idfile)
-                if newStatus.functionReturn != "File transfer complete":
-                    print newStatus.functionReturn
-                else:
-                    print "Sent."
-            elif ping == False:
-                print "Ping failed for " + computer.id + ", " + computer.ip + " Skipping..."
-            fileSendStatuses.append(newStatus)
 
-        self.tools.prettyPrintObjects(objects=fileSendStatuses, title="RSYNC File Send Report")
-        return fileSendStatuses
+        #create all threads
+        threads = []
+        for computer in self.computers:
+            computer.src = src
+            computer.dest = dest
+            computer.user = user
+            computer.idFile = idfile
+            threads.append(RsyncThreaded.RsyncThreaded(computer=computer))
+
+        #start all threads
+        for thread in threads:
+            thread.start()
+
+        # wait for all threads to terminate
+        while True:
+            time.sleep(0.5)
+            exit = True
+            for thread in threads:
+                if thread.isAlive() == True:
+                    exit = False
+            if exit == True:
+                break
+
+        # join all the threads
+        for thread in threads:
+            thread.join()
+        # print the report
+        self.tools.prettyPrintObjects(objects=self.computers, title="RSYNC File Send Report", objFilter="cmd,idFile,dfstatus,user")

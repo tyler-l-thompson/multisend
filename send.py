@@ -39,7 +39,7 @@ def main():
             sys.exit(0)
         if not args.y:
             confirmSend(cmd="rsync")
-        cd.sendFileToAll(src=args.src, dest=args.dest, user=args.u, idfile=args.i)
+        cd.sendFileToAllThreaded(src=args.src, dest=args.dest, user=args.u, idfile=args.i)
         sys.exit(0)
 
     elif args.c != None:
@@ -78,7 +78,7 @@ def confirmSend(cmd):
     yesCmd = "yeah bro"
     noCmd = "nah man"
     print "\nPreparing to send terminal command '" + cmd + "' to the following computers:"
-    tools.prettyPrintObjects(objects=cd.computers, title="Targeted Computers")
+    tools.prettyPrintObjects(objects=cd.computers, title="Targeted Computers", objFilter="src,dest,cmd,ping,idFile,functionReturn,dfstatus")
     while True:
         userInput = raw_input("Are you sure you want to send the command? [ " + yesCmd + " | " + noCmd + " ]\n>> ")
         if userInput != yesCmd and userInput != noCmd:
