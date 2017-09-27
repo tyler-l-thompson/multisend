@@ -5,7 +5,7 @@ Created on Aug 2, 2017
 '''
 
 import json,re,sys,time
-from Objects import Computer,SendStatus
+from Objects import Computer
 from Classes import Tools, SshSendThreaded, RsyncThreaded
 
 class Computers(object):
@@ -113,23 +113,8 @@ class Computers(object):
             computer.dfstatus = dfstatus
             threads.append(SshSendThreaded.SshSendThreaded(computer=computer))
 
-        #start all the threads
-        for thread in threads:
-            thread.start()
+        self.executeThreads(threads=threads)
 
-        #wait for all threads to terminate
-        while True:
-            time.sleep(0.5)
-            exit = True
-            for thread in threads:
-                if thread.isAlive() == True:
-                    exit = False
-            if exit == True:
-                break
-
-        #joing all the threads together
-        for thread in threads:
-            thread.join()
         #print the report
         self.tools.prettyPrintObjects(objects=self.computers, title="SSH Send Report", objFilter="src,cmd,dest,idFile,dfstatus,user")
 
@@ -165,13 +150,19 @@ class Computers(object):
             computer.idFile = idfile
             threads.append(RsyncThreaded.RsyncThreaded(computer=computer))
 
-        #start all threads
+        self.executeThreads(threads=threads)
+
+        # print the report
+        self.tools.prettyPrintObjects(objects=self.computers, title="RSYNC File Send Report", objFilter="cmd,idFile,dfstatus,user")
+
+    def executeThreads(self, threads):
+        # start all threads
         for thread in threads:
             thread.start()
 
         # wait for all threads to terminate
         while True:
-            time.sleep(0.5)
+            time.sleep(0.2)
             exit = True
             for thread in threads:
                 if thread.isAlive() == True:
@@ -182,5 +173,3 @@ class Computers(object):
         # join all the threads
         for thread in threads:
             thread.join()
-        # print the report
-        self.tools.prettyPrintObjects(objects=self.computers, title="RSYNC File Send Report", objFilter="cmd,idFile,dfstatus,user")
