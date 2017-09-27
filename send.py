@@ -45,28 +45,28 @@ def main():
     elif args.c != None:
         if not args.y:
             confirmSend(cmd=args.c)
-        cd.sendSshToAll(cmd=args.c, user=args.u, idFile=args.i)
+        cd.sendSshToAllThreaded(cmd=args.c, user=args.u, idFile=args.i)
         sys.exit(0)
 
     elif args.dffreeze == True:
         cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p bootFrozen"
         if not args.y:
             confirmSend(cmd=cmd)
-        cd.sendSshToAll(cmd=cmd, user=args.u, idFile=args.i)
+        cd.sendSshToAllThreaded(cmd=cmd, user=args.u, idFile=args.i)
         sys.exit(0)
 
     elif args.dfthaw == True:
         cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p bootThawed"
         if not args.y:
             confirmSend(cmd=cmd)
-        cd.sendSshToAll(cmd=cmd, user=args.u, idFile=args.i)
+        cd.sendSshToAllThreaded(cmd=cmd, user=args.u, idFile=args.i)
         sys.exit(0)
 
     elif args.dfstatus == True:
         cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p status"
         if not args.y:
             confirmSend(cmd=cmd)
-        cd.sendSshToAll(cmd=cmd, user=args.u, idFile=args.i, dfstatus=True)
+        cd.sendSshToAllThreaded(cmd=cmd, user=args.u, idFile=args.i, dfstatus=True)
         sys.exit(0)
 
     else:

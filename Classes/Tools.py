@@ -3,8 +3,7 @@ Created on July 6, 2017
 
 @author: Tyler Thompson
 '''
-
-import commands, re
+import commands,re
 
 class Tools(object):
     '''
@@ -16,7 +15,7 @@ class Tools(object):
         Constructor
         '''
 
-    def prettyPrintObjects(self, objects, title=None, dividers=True):
+    def prettyPrintObjects(self, objects, title=None, dividers=False, objFilter=None):
         horizontalLine = u'\u2501'
         verticalLine = u'\u2503'
         topLeftCorner = u'\u250F'
@@ -36,6 +35,16 @@ class Tools(object):
         thinThickBottomThreeWay = u'\u2537'
         thinThickTopFourWay = u'\u2547'
 
+        if objects == None:
+            print "None"
+            return None
+        try:
+            if len(objects) == 0:
+                print "Empty"
+                return None
+        except:
+            pass
+
         #test is if only single object was passed
         try:
             objects[0]
@@ -43,17 +52,50 @@ class Tools(object):
             objects = [objects]
 
 
+        #filter out specified variables DOES NOT WORK!
+        # try:
+        #     if objFilter != None:
+        #         objFilter = objFilter.split(',')
+        #         for afilter in objFilter:
+        #             for object in objects:
+        #                 del object.__dict__[afilter]
+        # except:
+        #     pass
+        if objFilter != None:
+            objFilter = objFilter.split(',')
+        else:
+            objFilter = []
+
 
         #get the individual spacer lengths
-        numHeaders = len(vars(objects[0]))
+        #numHeaders = len(vars(objects[0]))
+        #filter objects
+        #print vars(objects[0])
+        objVars = vars(objects[0])
+        filteredObjVars = []
+        for key in objVars:
+            #print key
+            if key in objFilter:
+                continue
+            filteredObjVars.append(key)
+        numHeaders = len(filteredObjVars)
+        #print filteredObjVars
+        #print numHeaders
+
+        #spacerHeaders = len(vars(objects[0]))
+
         spacerLengths = []
         for i in range(0, numHeaders):
-            spacerLength = len(str(vars(objects[0]).keys()[i]))
+            #spacerLength = len(str(vars(objects[0]).keys()[i]))
+            spacerLength = len(str(filteredObjVars[i]))
             for objecty in objects:
-                valueLength = len(str(vars(objecty).values()[i]))
+                valueLength = len(str(vars(objecty)[filteredObjVars[i]]))
+                #valueLength = len(str(vars(objecty).values()[i]))
+                #valueLength = vars(objecty)[objFilter[i]]
                 if valueLength > spacerLength:
                     spacerLength = valueLength
             spacerLengths.append(spacerLength)
+        #print spacerLengths
 
 
         #computer header length
@@ -65,10 +107,6 @@ class Tools(object):
 
         # print the title if it exists
         if title != None:
-            #if the title is an odd number of characters, add a space to make it even
-            if (len(title) %2 != 0):
-                title = title + " "
-
             title = str(title)
             # print the top title underline
             header = topLeftCorner
@@ -84,9 +122,10 @@ class Tools(object):
             titleString = titleString + title
             for _ in range(1, titleSpacerLength):
                 titleString = titleString + " "
-
-            # make sure title string is long enough
-            if len(titleString) < headerLength:
+            #fix length of spaces in title
+            if len(titleString) > headerLength:
+                titleString = titleString[:-1]
+            elif len(titleString) > headerLength:
                 titleString = titleString + " "
 
             titleString = titleString + verticalLine
@@ -124,8 +163,16 @@ class Tools(object):
 
         #print the headers
         print verticalLine,
+        i = 0;
         for key in vars(objects[0]):
-            spacer = spacerLengths[vars(objects[0]).keys().index(key)]
+            #object filter
+            if key in objFilter:
+                continue
+
+            #spacer = spacerLengths[vars(objects[0]).keys().index(key)]
+            spacer = spacerLengths[i]
+
+            i = i + 1
             spaceNum = spacer - len(str(key))
             divider = ""
             for _ in range(0, spaceNum):
@@ -153,15 +200,23 @@ class Tools(object):
         #print the objects
         for objecty in objects:
             print verticalLine,
+            i = 0
             for key, value in vars(objecty).iteritems():
-                spaceNum = spacerLengths[vars(objects[0]).keys().index(key)] - len(str(value))
+                # object filter
+                if key in objFilter:
+                    continue
+
+                #spaceNum = spacerLengths[vars(objects[0]).keys().index(key)] - len(str(value))
+                spaceNum = spacerLengths[i] - len(str(value))
+
                 divider = ""
                 for _ in range(0, spaceNum):
                     divider = divider + " "
                 divider = divider + " " + thinVerticalLine
-                if vars(objecty).keys().index(key) == (len(vars(objecty).keys()) - 1):
+                if vars(objecty).keys().index(key) == (len(vars(objecty).keys()) - 1) or key == filteredObjVars[len(filteredObjVars) - 1]:
                     divider = divider[:-1]
                     divider = divider + verticalLine
+                i = i + 1
                 print str(value) + divider,
             print
 
@@ -198,6 +253,10 @@ class Tools(object):
         print header
         print
 
+
+
+
+
     def getPing(self, ip):
         response = commands.getoutput("ping -c 1 -w 1 " + ip)
         regex = re.compile(r', 0% packet loss')
@@ -207,7 +266,7 @@ class Tools(object):
             return False
 
     def sendSsh(self, user, ip, cmd, idFile="~/.ssh/id_rsa", connectTimeout="5", strictHostKeyChecking="no", batchMode="yes"):
-        status = commands.getoutput('ssh -o ConnectTimeout=' + connectTimeout + ' -o StrictHostKeyChecking='
+        status = commands.getoutput('ssh -o ConnectTimeout=' + str(connectTimeout) + ' -o StrictHostKeyChecking='
                                   + strictHostKeyChecking + ' -o BatchMode=' + batchMode + ' -i ' + idFile
                                   + ' ' + user + '@' + ip + ' -C "' + cmd + '"')
         if "Permission denied" in status:
@@ -216,7 +275,7 @@ class Tools(object):
         return str(status).strip()
 
     def sendFile(self, user, ip, src, dest, idFile="~/.ssh/id_rsa", connectTimeout="5", strictHostKeyChecking="no", batchMode="yes"):
-        status = commands.getoutput("rsync -hav -e 'ssh -i " + idFile + " -o connectTimeout=" + connectTimeout +
+        status = commands.getoutput("rsync -hav -e 'ssh -i " + idFile + " -o connectTimeout=" + str(connectTimeout) +
                                     " -o strictHostKeyChecking=" + strictHostKeyChecking + " -o batchMode=" + batchMode + "' " +
                                     src + " " + user + "@" + ip + ":" + dest)
         if "Permission denied" in status:

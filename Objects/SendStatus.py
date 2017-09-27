@@ -10,7 +10,7 @@ class SendStatus(object):
     '''
 
 
-    def __init__(self, id, ip, user, ping, functionReturn=None):
+    def __init__(self, id, ip, user, ping, idfile=None, cmd=None, functionReturn=None, dfstatus=False):
         '''
         Constructor
         '''
@@ -18,4 +18,7 @@ class SendStatus(object):
         self.ip = ip
         self.user = user
         self.ping = ping
+        self.cmd = cmd
+        self.idfile = idfile
         self.functionReturn = functionReturn
+        self.dfstatus = dfstatus

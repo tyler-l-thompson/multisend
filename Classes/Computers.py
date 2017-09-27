@@ -4,9 +4,9 @@ Created on Aug 2, 2017
 @author: Tyler Thompson
 '''
 
-import json,re,sys
+import json,re,sys,time
 from Objects import Computer,SendStatus
-from Classes import Tools
+from Classes import Tools, SshSendThreaded
 
 class Computers(object):
     '''
@@ -98,6 +98,42 @@ class Computers(object):
 
         self.tools.prettyPrintObjects(objects=sshSendStatuses, title="SSH Send Report")
         return sshSendStatuses
+
+    def sendSshToAllThreaded(self, cmd, user, idFile, dfstatus=False):
+        print "Sending ssh command '" + cmd + "' to targeted computers..."
+
+        #create thread object for each computer
+        sshThreads = []
+        for computer in self.computers:
+            #print computer.hostname + "... ",
+            computer.idFile = idFile
+            computer.user = user
+            computer.dfstatus = dfstatus
+            computer.cmd = cmd
+            computer.dfstatus = dfstatus
+            sshThreads.append(SshSendThreaded.SshSendThreaded(computer=computer))
+
+        #start all the threads
+        for sshThread in sshThreads:
+            status = sshThread.start()
+
+        #wait for all threads to terminate
+        while True:
+            time.sleep(0.5)
+            exit = True
+            for sshThread in sshThreads:
+                if sshThread.isAlive() == True:
+                    exit = False
+            if exit == True:
+                break
+
+        #joing all the threads together
+        returnStatuses = []
+        for sshThread in sshThreads:
+            returnStatuses.append(sshThread.join())
+
+        self.tools.prettyPrintObjects(objects=returnStatuses, title="SSH Send Report", objFilter="src,cmd,dest,idFile,dfstatus,user")
+        return returnStatuses
 
     def sendFileToAll(self, src, dest, user, idfile):
         print "Sending file: " + src + " to: " + dest + " on targeted computers..."
