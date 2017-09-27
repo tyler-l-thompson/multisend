@@ -19,7 +19,6 @@ class SshSendThreaded(threading.Thread):
         self.tools = Tools.Tools()
 
     def run(self):
-        #print ("Starting " + str(self.id))
         if self.tools.getPing(ip=self.computer.ip) == True:
             self.computer.functionReturn=(str(self.tools.sendSsh(user=self.computer.user, ip=self.computer.ip, cmd=self.computer.cmd)))
 
@@ -38,7 +37,6 @@ class SshSendThreaded(threading.Thread):
         else:
             self.computer.functionReturn=("Host Down.")
             self.computer.ping = False
-        #print ("Exiting " + str(self.id))
 
     def join(self):
         return self.computer

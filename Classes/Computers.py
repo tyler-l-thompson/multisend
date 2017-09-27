@@ -100,7 +100,7 @@ class Computers(object):
     #     return sshSendStatuses
 
     def sendSshToAllThreaded(self, cmd, user, idFile, dfstatus=False):
-        print "Sending ssh command '" + cmd + "' to targeted computers..."
+        print "Sending ssh command '" + cmd + "' to targeted computers...",
 
         #create thread object for each computer
         threads = []
@@ -139,7 +139,7 @@ class Computers(object):
     #     return fileSendStatuses
 
     def sendFileToAllThreaded(self, src, dest, user, idfile):
-        print "Sending file: " + src + " to: " + dest + " on targeted computers..."
+        print "Sending file: " + src + " to: " + dest + " on targeted computers...",
 
         #create all threads
         threads = []
@@ -158,9 +158,12 @@ class Computers(object):
     def executeThreads(self, threads):
         # start all threads
         for thread in threads:
-            print ("."),
+            #print ("."),
+            sys.stdout.write('.')
+            sys.stdout.flush()
             thread.start()
 
+        print "Done.\nWaiting for threads to terminate...",
         # wait for all threads to terminate
         while True:
             time.sleep(0.2)
@@ -168,9 +171,11 @@ class Computers(object):
             for thread in threads:
                 if thread.isAlive() == True:
                     exit = False
+            sys.stdout.write('.')
+            sys.stdout.flush()
             if exit == True:
                 break
-
+        print "Done."
         # join all the threads
         for thread in threads:
             thread.join()
