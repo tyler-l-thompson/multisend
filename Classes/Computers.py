@@ -158,6 +158,7 @@ class Computers(object):
     def executeThreads(self, threads):
         # start all threads
         for thread in threads:
+            print ("."),
             thread.start()
 
         # wait for all threads to terminate
