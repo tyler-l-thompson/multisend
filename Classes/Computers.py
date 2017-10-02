@@ -99,17 +99,19 @@ class Computers(object):
     #     self.tools.prettyPrintObjects(objects=sshSendStatuses, title="SSH Send Report")
     #     return sshSendStatuses
 
-    def sendSshToAllThreaded(self, cmd, user, idFile, dfstatus=False):
+    def sendSshToAllThreaded(self, cmd, user, idFile, dfstatus=False, rename=False):
         print "Sending ssh command '" + cmd + "' to targeted computers...",
 
         #create thread object for each computer
         threads = []
         for computer in self.computers:
             #print computer.hostname + "... ",
+            if rename == True:
+                computer.cmd = str(cmd) + str(computer.hostname) + " && hostname"
+            else:
+                computer.cmd = cmd
             computer.idFile = idFile
             computer.user = user
-            computer.dfstatus = dfstatus
-            computer.cmd = cmd
             computer.dfstatus = dfstatus
             threads.append(SshSendThreaded.SshSendThreaded(computer=computer))
 
