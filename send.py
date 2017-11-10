@@ -5,13 +5,14 @@ Created on Aug 2, 2017
 @author: Tyler Thompson
 '''
 
-import optparse,sys
+import optparse,sys,os
 from Classes import Tools,Computers
 
 tools = Tools.Tools()
 cd = None
 
 configFilePath = "/alva/LabInfo/json/C-220.json"
+serverConfigFilePath = "/alva/ServerInfo/multisend/serverinfo.json"
 
 def main():
     args = getArgs()
@@ -21,6 +22,13 @@ def main():
     global configFilePath
     if args.f != False:
         configFilePath = args.f
+
+    #set the server config file if the user puts it in server mode.
+    if args.s != False:
+        if os.path.isfile(serverConfigFilePath):
+            configFilePath = serverConfigFilePath
+        else:
+            configFilePath = "/serverinfo.json"
 
     global cd
     cd = Computers.Computers(configFilePath=configFilePath)
@@ -124,6 +132,7 @@ def getArgs():
     parser.add_option('-m', action="store", default=False, help="Set comma delimited list of computers to send command to. ie. 03,05,10,23")
     parser.add_option('-p', action="store_true", default=False, help="Print the config and exit.")
     parser.add_option('-f', action="store", default=False, help="Specify a different config file to read. Default: " + configFilePath)
+    parser.add_option('-s', action="store", default=False, help="Use the server config instead. Default: " + serverConfigFilePath)
     parser.add_option('--rename', action="store_true", default=False, help="Rename the computer's hostname to the one specified in the config file.")
     parser.add_option('--dffreeze', action="store_true", default=False, help="DeepFreeze: Freeze specified computers.")
     parser.add_option('--dfthaw', action="store_true", default=False, help="DeepFreeze: Thaw specified computers")

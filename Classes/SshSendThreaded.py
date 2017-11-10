@@ -20,7 +20,11 @@ class SshSendThreaded(threading.Thread):
 
     def run(self):
         if self.tools.getPing(ip=self.computer.ip) == True:
-            self.computer.functionReturn=(str(self.tools.sendSsh(user=self.computer.user, ip=self.computer.ip, cmd=self.computer.cmd)))
+            self.computer.functionReturn=(str(self.tools.sendSsh(user=self.computer.user, ip=self.computer.ip, cmd=self.computer.cmd))).replace("\n", "").replace("\t", "").replace(" ", "")
+
+            maxReturnLength = 50
+            if len(self.computer.functionReturn) > maxReturnLength:
+                self.computer.functionReturn = self.computer.functionReturn[:maxReturnLength - 3] + "..."
 
             # detect if reading a deep freeze status report
             if self.computer.dfstatus == True:
