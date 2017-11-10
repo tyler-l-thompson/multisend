@@ -28,7 +28,7 @@ def main():
         if os.path.isfile(serverConfigFilePath):
             configFilePath = serverConfigFilePath
         else:
-            configFilePath = "/serverinfo.json"
+            configFilePath = "/etc/ControlStation/ServerInfo/multisend/serverinfo.json"
 
     global cd
     cd = Computers.Computers(configFilePath=configFilePath)
