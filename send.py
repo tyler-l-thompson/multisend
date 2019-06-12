@@ -68,21 +68,24 @@ def main():
 
     #--dffreeze DeepFreeze Freeze
     elif args.dffreeze == True:
-        cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p bootFrozen"
+        # cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p bootFrozen"
+        cmd = "DFXPSWD={0} /usr/local/bin/deepfreeze freeze --env".format(args.dfpass)
         if not args.y:
             confirmSend(cmd=cmd)
         cd.sendSshToAllThreaded(cmd=cmd, user=args.u, idFile=args.i)
 
     #--dfthaw DeepFreeze Thaw
     elif args.dfthaw == True:
-        cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p bootThawed"
+        # cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p bootThawed"
+        cmd = "DFXPSWD={0} /usr/local/bin/deepfreeze thaw --env".format(args.dfpass)
         if not args.y:
             confirmSend(cmd=cmd)
         cd.sendSshToAllThreaded(cmd=cmd, user=args.u, idFile=args.i)
 
     #--dfstatus DeepFreeze Status
     elif args.dfstatus == True:
-        cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p status"
+        # cmd = "DFXPSWD=" + args.dfpass + " '/Library/Application Support/Faronics/Deep Freeze/deepfreeze' -u " + args.dfuser + " -p status"
+        cmd = "DFXPSWD={0} /usr/local/bin/deepfreeze status --env".format(args.dfpass)
         if not args.y:
             confirmSend(cmd=cmd)
         cd.sendSshToAllThreaded(cmd=cmd, user=args.u, idFile=args.i, dfstatus=True)

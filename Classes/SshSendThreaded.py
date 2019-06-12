@@ -24,9 +24,10 @@ class SshSendThreaded(threading.Thread):
 
             # detect if reading a deep freeze status report
             if self.computer.dfstatus == True:
-                if "BOOTFROZEN" in self.computer.functionReturn:
+                print(self.computer.functionReturn)
+                if "BOOTFROZEN" in self.computer.functionReturn or "GlobalState:Frozen" in self.computer.functionReturn:
                     self.computer.functionReturn = "FROZEN"
-                elif "BOOTTHAWED" in self.computer.functionReturn:
+                elif "BOOTTHAWED" in self.computer.functionReturn or "GlobalState:Thawed" in self.computer.functionReturn:
                     self.computer.functionReturn = "THAWED"
                 else:
                     self.computer.functionReturn = "UNKNOWN"
